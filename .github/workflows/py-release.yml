@@ -1,0 +1,43 @@
+name: py-release
+
+on:
+  push:
+    tags: ["py-v*"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: py
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.10.9"
+          working-directory: py
+      - run: uv run --locked python scripts/check.py
+      - run: test "py-v$(uv version --short)" = "$GITHUB_REF_NAME"
+      - run: uv build --out-dir dist
+      - run: uv run --isolated --no-project --with dist/*.whl python -c "import aclp; [getattr(aclp, n) for n in aclp.__all__]"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: py/dist
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1

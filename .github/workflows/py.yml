@@ -1,0 +1,27 @@
+name: py
+
+on:
+  pull_request:
+    paths: ["py/**", ".github/workflows/py.yml"]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["py/**", ".github/workflows/py.yml"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: py
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.10.9"
+          working-directory: py
+      - run: uv run --locked python scripts/check.py
