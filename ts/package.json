@@ -1,0 +1,82 @@
+{
+  "name": "@superaligned/aclp",
+  "version": "0.1.0",
+  "description": "ACLP for TypeScript: a client and callback server, plus the aclp CLI that connects ACLP servers to agent harnesses.",
+  "keywords": [
+    "aclp",
+    "agent",
+    "agent-hooks",
+    "json-rpc",
+    "lifecycle",
+    "claude-code",
+    "codex",
+    "opencode",
+    "mcp",
+    "cli"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/superaligned-to/aclp-ts.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.30.3",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/hooks/runtime.d.ts",
+      "import": "./dist/hooks/runtime.js"
+    }
+  },
+  "bin": {
+    "aclp": "dist/bin/aclp.js",
+    "aclp-hook": "dist/bin/aclp-hook.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "format": "biome check --write .",
+    "lint": "biome check . && markdownlint-cli2",
+    "typecheck": "tsc --noEmit",
+    "build": "node scripts/bundle.ts && tsc -p tsconfig.build.json",
+    "generate": "node scripts/generate.ts",
+    "guard": "node scripts/generate.ts --check && node scripts/guard.ts",
+    "test": "node --test \"src/**/*.test.ts\" \"scripts/*.test.ts\"",
+    "check": "pnpm lint && pnpm typecheck && pnpm build && pnpm guard && pnpm test",
+    "example": "node examples/context-and-errors.ts"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.3",
+    "@clack/prompts": "1.8.1",
+    "@types/node": "26.6.6",
+    "esbuild": "0.28.2",
+    "json-schema-to-typescript": "16.0.0",
+    "markdownlint-cli2": "0.24.0",
+    "typescript": "7.0.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": []
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  }
+}
