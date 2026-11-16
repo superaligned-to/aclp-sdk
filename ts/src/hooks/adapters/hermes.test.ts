@@ -23,6 +23,8 @@ hooks["post_tool_call"](tool_name="terminal", args={"command": "ls"}, result="a 
 print(json.dumps({"reply": reply, "hooks": sorted(hooks)}))
 `;
 
+import { VERSION } from "../version.ts";
+
 const python = spawnSync("python3", ["--version"]).status === 0;
 
 test("the Hermes plugin returns server context from pre_llm_call", {
@@ -77,5 +79,5 @@ test("the Hermes plugin returns server context from pre_llm_call", {
     seen.map((s) => s.method),
     ["session.started", "input.submitted", "tool.finished"],
   );
-  assert.ok(seen.every((s) => s.client === "aclp/0.1.0 hermes"));
+  assert.ok(seen.every((s) => s.client === `aclp/${VERSION} hermes`));
 });

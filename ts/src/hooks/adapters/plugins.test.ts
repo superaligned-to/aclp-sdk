@@ -7,6 +7,7 @@ import {
   tempEnv,
   withEnv,
 } from "../test-support.ts";
+import { VERSION } from "../version.ts";
 import { opencode } from "./opencode.ts";
 import { opencodePlugin } from "./opencode-runtime.ts";
 import { pi } from "./pi.ts";
@@ -161,7 +162,7 @@ test("the OpenCode plugin injects server context into the system prompt", async 
     seen.map((s) => s.method),
     ["session.started", "input.submitted", "tool.finished"],
   );
-  assert.ok(seen.every((s) => s.client === "aclp/0.1.0 opencode"));
+  assert.ok(seen.every((s) => s.client === `aclp/${VERSION} opencode`));
 });
 
 test("the Pi extension adds server context before the agent starts", async (t) => {

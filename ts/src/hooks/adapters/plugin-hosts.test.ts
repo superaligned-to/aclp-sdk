@@ -7,6 +7,7 @@ import {
   tempEnv,
   withEnv,
 } from "../test-support.ts";
+import { VERSION } from "../version.ts";
 import { ampPlugin } from "./amp-runtime.ts";
 import { clinePlugin } from "./cline-runtime.ts";
 import { openclawPlugin } from "./openclaw-runtime.ts";
@@ -46,7 +47,7 @@ test("the OMP extension uses Pi's events and identifies as omp", async (t) => {
   });
   await settle(seen, 1);
   assert.deepEqual(seen, [
-    { method: "input.submitted", client: "aclp/0.1.0 omp" },
+    { method: "input.submitted", client: `aclp/${VERSION} omp` },
   ]);
 });
 
@@ -87,7 +88,7 @@ test("the Amp plugin returns server context as a hidden message", async (t) => {
     seen.map((s) => s.method),
     ["session.started", "input.submitted", "tool.finished", "session.ended"],
   );
-  assert.ok(seen.every((s) => s.client === "aclp/0.1.0 amp"));
+  assert.ok(seen.every((s) => s.client === `aclp/${VERSION} amp`));
 });
 
 test("the Cline plugin inserts context before the newest user message once per prompt", async (t) => {
@@ -176,5 +177,5 @@ test("the OpenClaw plugin prepends context in before_prompt_build", async (t) =>
     seen.map((s) => s.method),
     ["session.started", "input.submitted", "tool.finished"],
   );
-  assert.ok(seen.every((s) => s.client === "aclp/0.1.0 openclaw"));
+  assert.ok(seen.every((s) => s.client === `aclp/${VERSION} openclaw`));
 });

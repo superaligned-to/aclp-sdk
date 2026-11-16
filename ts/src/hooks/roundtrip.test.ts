@@ -16,6 +16,7 @@ import { plan } from "./plan.ts";
 import { listServers } from "./registry.ts";
 import { planServer, registerServer, unregisterServer } from "./servers.ts";
 import { listen, tempEnv } from "./test-support.ts";
+import { VERSION } from "./version.ts";
 
 const context = defineResult<{ context: { id: string; content: string }[] }>({
   type: "object",
@@ -150,7 +151,7 @@ test("install → server add → hook fire → server remove → uninstall, with
 
   const registered = seen.find((s) => s.method === "client.registered");
 
-  assert.match(registered?.client ?? "", /^aclp\/0\.1\.0 claude-code$/);
+  assert.equal(registered?.client, `aclp/${VERSION} claude-code`);
 
   const settings = join(env.home, ".claude", "settings.json");
 

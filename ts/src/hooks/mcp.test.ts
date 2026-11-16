@@ -3,6 +3,7 @@ import { PassThrough } from "node:stream";
 import { test } from "node:test";
 import { CONTEXT_TOOL, serveMcp } from "./mcp.ts";
 import { contextServer, register, settle, tempEnv } from "./test-support.ts";
+import { VERSION } from "./version.ts";
 
 test("aclp mcp serves a context tool that forwards to ACLP servers with harness identity", async (t) => {
   const env = tempEnv(t);
@@ -65,5 +66,5 @@ test("aclp mcp serves a context tool that forwards to ACLP servers with harness 
     seen.map((s) => s.method),
     ["session.started", "input.submitted", "session.ended"],
   );
-  assert.ok(seen.every((s) => s.client === "aclp/0.1.0 claude-desktop"));
+  assert.ok(seen.every((s) => s.client === `aclp/${VERSION} claude-desktop`));
 });
