@@ -1,6 +1,6 @@
 //! Client and callback server for the Agent Context Lifecycle Protocol (ACLP).
 //!
-//! A [`Client`] sends typed lifecycle [`events`] over loopback HTTP as JSON-RPC requests or
+//! A [`Client`] sends typed lifecycle [`events`] over HTTP or HTTPS as JSON-RPC requests or
 //! notifications. A [`Server`] validates each message against the pinned protocol schema, invokes
 //! the matching [`Callbacks`] entry and checks request results against their [`ResultSchema`].
 //!
