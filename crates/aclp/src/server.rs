@@ -221,13 +221,18 @@ impl Inner {
             return Ok(invalid(id.as_deref(), -32601, "Method not found"));
         }
 
+        let served = self
+            .callbacks
+            .get_key_value(method)
+            .filter(|(_, cb)| id.is_none() || cb.result.is_some());
+
+        let Some((&method, cb)) = served else {
+            return Ok(invalid(id.as_deref(), -32601, "Method not found"));
+        };
+
         if !validation::validate_params(method, &msg["params"]) {
             return Ok(invalid(id.as_deref(), -32602, "Invalid params"));
         }
-
-        let Some((&method, cb)) = self.callbacks.get_key_value(method) else {
-            return Ok(invalid(id.as_deref(), -32601, "Method not found"));
-        };
 
         let call = Invocation {
             cb,
@@ -238,9 +243,8 @@ impl Inner {
         };
 
         Ok(match (id, &cb.result) {
-            (None, _) => self.notify(call),
             (Some(id), Some(result)) => self.request(call, result, &id).await,
-            (Some(id), None) => rpc_error(StatusCode::OK, Some(&id), -32601, "Method not found"),
+            _ => self.notify(call),
         })
     }
 

@@ -152,10 +152,13 @@ async fn invalid_messages_never_invoke_callbacks_and_notification_errors_have_em
 
     let server = start(counting(&calls), ServerOptions::new()).await;
 
-    let with = |mut msg: Value, key: &str, val: Value| {
+    let with_value = |mut msg: Value, key: &str, val: Value| {
         msg[key] = val;
-        msg.to_string().into_bytes()
+        msg
     };
+
+    let with =
+        |msg: Value, key: &str, val: Value| with_value(msg, key, val).to_string().into_bytes();
 
     let cases: Vec<(Vec<u8>, u16, Option<i64>)> = vec![
         (b"{".to_vec(), 400, Some(-32700)),
@@ -185,6 +188,24 @@ async fn invalid_messages_never_invoke_callbacks_and_notification_errors_have_em
             with(input_message("i"), "params", json!({})),
             200,
             Some(-32602),
+        ),
+        (
+            with(
+                with_value(input_message("i"), "method", json!("session.started")),
+                "params",
+                json!({}),
+            ),
+            200,
+            Some(-32601),
+        ),
+        (
+            with(
+                with_value(tool_message(), "id", json!("r")),
+                "params",
+                json!({}),
+            ),
+            200,
+            Some(-32601),
         ),
         (
             with(tool_message(), "method", json!("unknown.event")),
