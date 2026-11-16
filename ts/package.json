@@ -1,6 +1,6 @@
 {
   "name": "@superaligned/aclp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ACLP for TypeScript: a client and callback server, plus the aclp CLI that connects ACLP servers to agent harnesses.",
   "keywords": [
     "aclp",
