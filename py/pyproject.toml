@@ -1,0 +1,109 @@
+[project]
+name = "superaligned-aclp"
+version = "0.1.0"
+description = "Python client and callback server for the Agent Context Lifecycle Protocol (ACLP)."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+keywords = ["aclp", "agent", "json-rpc", "lifecycle", "hooks"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Framework :: AsyncIO",
+    "Typing :: Typed",
+]
+# jsonschema validates Draft-07 with nested $id resolution; fastjsonschema (zero dependencies)
+# was rejected because it cannot resolve the pinned schema's nested meta-schema and fails to
+# compile its patterns on Python 3.14. referencing, already required by jsonschema, supplies
+# the empty registry that keeps every $ref offline. Transitively: attrs,
+# jsonschema-specifications and rpds-py, plus typing-extensions before Python 3.13.
+# The HTTP client is the standard library: httpx has shipped no stable release since 0.28.1
+# (December 2024), reads proxy variables from the environment by default, and adds five
+# packages for one request per connection.
+dependencies = ["jsonschema>=4.23", "referencing>=0.35"]
+
+[project.urls]
+Repository = "https://github.com/superaligned-to/aclp-sdk"
+Protocol = "https://github.com/superaligned-to/aclp"
+
+[dependency-groups]
+test = [
+    "hypothesis>=6.140",
+    "pytest>=9.0",
+    "trustme>=1.2",
+    "uvicorn>=0.38",
+]
+dev = [
+    { include-group = "test" },
+    "mypy>=2.4",
+    "pip-audit>=2.10",
+    "ruff>=0.17",
+    "types-jsonschema>=4.23",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv]
+exclude-newer = "7 days"
+
+[tool.uv.build-backend]
+module-name = "aclp"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "ASYNC",
+    "B",
+    "BLE",
+    "C4",
+    "E",
+    "F",
+    "I",
+    "N",
+    "PIE",
+    "PT",
+    "PTH",
+    "RET",
+    "RUF",
+    "S",
+    "SIM",
+    "UP",
+    "W",
+]
+ignore = [
+    "E501", # the formatter owns line length; long string literals stay whole
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/aclp/_async_client.py" = [
+    "ASYNC109", # discover_async takes `timeout` so the generated sync twin keeps the same signature
+]
+"tests/**" = [
+    "S101", # pytest asserts with assert
+]
+"scripts/**" = [
+    "S603", # the gate runs fixed tool commands, never user input
+    "S607", # tools resolve from PATH, as in a developer shell
+]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+files = ["src", "tests", "scripts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "-p", "no:cacheprovider"]
+filterwarnings = ["error"]
