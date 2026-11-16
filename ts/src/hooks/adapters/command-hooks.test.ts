@@ -112,6 +112,37 @@ test("tool results keep arguments and clip long output", async () => {
   );
 });
 
+test("tool calls inside a subagent name the subagent", async () => {
+  const inSubagent = { agent_id: "def456", agent_type: "Explore" };
+  const [requested] = await claudeCode.map("PreToolUse", {
+    ...payloads.PreToolUse,
+    ...inSubagent,
+  });
+  const [finished] = await claudeCode.map("PostToolUse", {
+    ...payloads.PostToolUse,
+    ...inSubagent,
+  });
+  const [failed] = await claudeCode.map("PostToolUseFailure", {
+    ...payloads.PostToolUseFailure,
+    ...inSubagent,
+  });
+
+  await assertValid(
+    [requested, finished, failed].filter((m) => m !== undefined),
+  );
+  assert.equal(requested?.params.agentId, "def456");
+  assert.equal(finished?.params.agentId, "def456");
+  assert.equal(failed?.params.agentId, "def456");
+});
+
+test("tool calls in the main session name no agent", async () => {
+  const [requested] = await claudeCode.map("PreToolUse", payloads.PreToolUse);
+  const [finished] = await claudeCode.map("PostToolUse", payloads.PostToolUse);
+
+  assert.equal(requested !== undefined && "agentId" in requested.params, false);
+  assert.equal(finished !== undefined && "agentId" in finished.params, false);
+});
+
 test("payloads without a session or prompt produce nothing", async () => {
   assert.deepEqual(
     await claudeCode.map("UserPromptSubmit", { prompt: "hi" }),
