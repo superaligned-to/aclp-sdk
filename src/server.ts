@@ -124,6 +124,19 @@ function isNotification(value: unknown): boolean {
   );
 }
 
+function serves(
+  callbacks: Callbacks,
+  method: EventMethod,
+  id: string | undefined,
+): boolean {
+  const callback = callbacks[method];
+
+  return (
+    callback !== undefined &&
+    (id === undefined || callback.result !== undefined)
+  );
+}
+
 function callContext(request: IncomingMessage): CallContext {
   const client = request.headers["aclp-client"];
 
@@ -198,16 +211,8 @@ export function createServer(
   ): Promise<boolean> => {
     const callback = callbacks[method];
 
-    if (
-      callback === undefined ||
-      (id !== undefined && callback.result === undefined)
-    ) {
-      if (id === undefined) {
-        sendEmpty(response, 400);
-      } else {
-        sendError(response, 200, id, -32601, "Method not found");
-      }
-
+    if (callback === undefined) {
+      sendEmpty(response, 400);
       return false;
     }
 
@@ -301,7 +306,10 @@ export function createServer(
         return;
       }
 
-      if (!isEventMethod(message.method)) {
+      if (
+        !isEventMethod(message.method) ||
+        !serves(callbacks, message.method, message.id)
+      ) {
         if (message.id === undefined) {
           sendEmpty(response, 400);
         } else {

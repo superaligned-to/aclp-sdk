@@ -220,6 +220,11 @@ test("invalid messages never invoke callbacks and notification errors have empty
     [JSON.stringify({ ...input, id: "é".repeat(65) }), 400, -32600],
     [JSON.stringify({ ...input, method: "unknown.event" }), 200, -32601],
     [JSON.stringify({ ...input, params: {} }), 200, -32602],
+    [
+      JSON.stringify({ ...input, method: "session.started", params: {} }),
+      200,
+      -32601,
+    ],
     [JSON.stringify({ ...tool, method: "unknown.event" }), 400, undefined],
     [JSON.stringify({ ...tool, params: {} }), 400, undefined],
     [JSON.stringify({ ...tool, extra: true }), 400, undefined],
@@ -264,6 +269,18 @@ test("notification-only callbacks reject requests before executing", async () =>
     assert.deepEqual(JSON.parse(reply.body), {
       jsonrpc: "2.0",
       id: "request-1",
+      error: { code: -32601, message: "Method not found" },
+    });
+
+    const invalid = await post(
+      url,
+      JSON.stringify({ ...tool, id: "request-2", params: {} }),
+    );
+
+    assert.equal(invalid.status, 200);
+    assert.deepEqual(JSON.parse(invalid.body), {
+      jsonrpc: "2.0",
+      id: "request-2",
       error: { code: -32601, message: "Method not found" },
     });
     assert.equal(calls, 0);
