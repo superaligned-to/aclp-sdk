@@ -5,7 +5,7 @@ import {
   discover,
   type OnError,
 } from "../index.ts";
-import { HARNESSES, type HarnessId, SUPPORTED_EVENTS } from "./adapter.ts";
+import { type HarnessId, SUPPORTED_EVENTS } from "./adapter.ts";
 import {
   type Credential,
   deleteCredential,
@@ -195,8 +195,4 @@ export async function unregisterServer(
   await announce(env, current, "client.unregistered").catch(() => undefined);
   deleteCredential(env, name);
   return removeServer(env, name);
-}
-
-export function allHarnesses(): HarnessId[] {
-  return [...HARNESSES];
 }
