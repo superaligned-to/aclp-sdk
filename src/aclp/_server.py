@@ -409,14 +409,14 @@ class _App:
             await _invalid(send, id_, -32601, "Method not found")
             return
 
-        if not validate_params(method, params):
-            await _invalid(send, id_, -32602, "Invalid params")
-            return
-
         cb = self.callbacks.get(method)
 
         if cb is None or (id_ is not None and cb.result is None):
             await _invalid(send, id_, -32601, "Method not found")
+            return
+
+        if not validate_params(method, params):
+            await _invalid(send, id_, -32602, "Invalid params")
             return
 
         if id_ is None:

@@ -146,6 +146,8 @@ def test_every_standard_event_example_is_admitted() -> None:
         (message("input.submitted", {"sessionId": "s"}), 200, -32602, "r1"),
         (message("session.started", {"sessionId": "s"}), 200, -32601, "r1"),
         (message("run.paused", {"sessionId": "s"}), 200, -32601, "r1"),
+        (message("session.started", {}), 200, -32601, "r1"),
+        (message("run.paused", {}), 200, -32601, "r1"),
     ],
 )
 def test_invalid_requests_get_the_json_rpc_error_the_binding_requires(
@@ -156,7 +158,10 @@ def test_invalid_requests_get_the_json_rpc_error_the_binding_requires(
 
     assert reply.status == status
     assert reply.rpc()["id"] == id_
-    assert reply.rpc()["error"] == {"code": code, "message": reply.rpc()["error"]["message"]}  # type: ignore[index]
+    err = reply.rpc()["error"]
+    assert isinstance(err, dict)
+    assert err["code"] == code
+    assert set(err) == {"code", "message"}
 
 
 @pytest.mark.parametrize(
