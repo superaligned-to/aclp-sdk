@@ -1,10 +1,9 @@
 # aclp for Rust
 
-Rust client and callback server for the [Agent Context Lifecycle Protocol](https://github.com/superaligned-to/aclp). The client sends typed lifecycle events to local or remote servers over HTTP or HTTPS; the server validates them, runs your callbacks and checks their results against a JSON Schema.
+[ACLP](https://github.com/superaligned-to/aclp) client and callback server.
 
-```toml
-[dependencies]
-aclp = "0.1"
+```sh
+cargo add aclp
 ```
 
 ## Example
@@ -69,8 +68,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Notifications use `client.notify(&params)` and `client.flush().await`. A runnable example with both delivery paths and shutdown:
-
 ```sh
 cargo run -p aclp --example context-and-errors
 ```
@@ -81,4 +78,4 @@ cargo run -p aclp --example context-and-errors
 cargo xtask check
 ```
 
-Licensed under [MIT](LICENSE).
+MIT

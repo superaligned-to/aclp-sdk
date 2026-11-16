@@ -1,13 +1,80 @@
 # ACLP SDKs
 
-Client and callback-server libraries for the [Agent Context Lifecycle Protocol](https://github.com/superaligned-to/aclp), one directory per language. Each SDK sends typed lifecycle events over HTTP and serves callbacks that validate params and results against the same pinned schema.
+[ACLP](https://github.com/superaligned-to/aclp) clients and callback servers.
 
-| Directory | Package | Install |
+| Dir | Package | Install |
 | --- | --- | --- |
-| [`ts`](ts) | [`@superaligned/aclp`](https://www.npmjs.com/package/@superaligned/aclp), also the `aclp` CLI for agent harnesses | `pnpm add @superaligned/aclp` |
-| [`rs`](rs) | [`aclp`](https://crates.io/crates/aclp) | `cargo add aclp` |
-| [`py`](py) | [`superaligned-aclp`](https://pypi.org/project/superaligned-aclp/) | `uv add superaligned-aclp` |
+| [`ts`](ts) | `@superaligned/aclp` | `pnpm add @superaligned/aclp` |
+| [`rs`](rs) | `aclp` | `cargo add aclp` |
+| [`py`](py) | `superaligned-aclp` | `uv add superaligned-aclp` |
 
-Each directory's README has a complete example. The protocol itself, its events and its schema live in [superaligned-to/aclp](https://github.com/superaligned-to/aclp).
+## TypeScript
 
-Licensed under [MIT](LICENSE).
+```ts
+import { createClient, defineResult } from "@superaligned/aclp";
+
+const context = defineResult<{ context: string[] }>({
+  type: "object",
+  properties: { context: { type: "array", items: { type: "string" } } },
+  required: ["context"],
+});
+
+const client = createClient({ url: "http://127.0.0.1:8787/aclp" });
+
+const reply = await client.request("input.submitted", {
+  sessionId: "session-1",
+  content: [{ type: "text", text: "Create a class." }],
+}, context);
+```
+
+```sh
+npx @superaligned/aclp install claude-code
+npx @superaligned/aclp server add memory --url http://127.0.0.1:8787/aclp
+```
+
+## Rust
+
+```rust
+use aclp::events::{ContentBlock, InputSubmittedParams};
+use aclp::{Client, ClientOptions, ResultSchema};
+use serde_json::{Value, json};
+
+let context = ResultSchema::<Value>::new(json!({ "type": "object" }))?;
+
+let client = Client::new(ClientOptions::new("http://127.0.0.1:8787/aclp"))?;
+
+let input = InputSubmittedParams {
+    session_id: "session-1".to_owned(),
+    run_id: None,
+    agent_id: None,
+    content: vec![ContentBlock::Text { text: "Create a class.".to_owned() }],
+    structured_content: None,
+};
+
+let reply = client.request(&input, &context).await?;
+```
+
+## Python
+
+```python
+import aclp
+
+context = aclp.ResultSchema[dict[str, list[str]]]({"type": "object"})
+
+with aclp.Client("http://127.0.0.1:8787/aclp") as client:
+    reply = client.request(
+        "input.submitted",
+        {"sessionId": "session-1", "content": [{"type": "text", "text": "Create a class."}]},
+        context,
+    )
+```
+
+## Development
+
+```sh
+(cd ts && pnpm install --frozen-lockfile && pnpm check)
+(cd rs && cargo xtask check && cargo xtask interop ../ts)
+(cd py && uv run python scripts/check.py)
+```
+
+MIT

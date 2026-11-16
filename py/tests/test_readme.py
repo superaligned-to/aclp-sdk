@@ -11,7 +11,7 @@ README = Path(__file__).parent.parent / "README.md"
 def test_readme_example_prints_what_it_promises() -> None:
     text = README.read_text()
     code = re.search(r"```python\n(.*?)```", text, re.S)
-    promised = re.search(r"It prints `(.*?)`", text)
+    promised = re.search(r"```text\n(.*?)\n```", text, re.S)
 
     assert code is not None
     assert promised is not None

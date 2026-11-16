@@ -1,28 +1,26 @@
 # aclp for TypeScript
 
-The TypeScript package for the [Agent Context Lifecycle Protocol](https://github.com/superaligned-to/aclp): the `aclp` CLI that connects ACLP servers to your agent harnesses, and a client and callback server for building your own.
+[ACLP](https://github.com/superaligned-to/aclp) client, callback server and the `aclp` harness CLI.
 
-## Connect a harness
+## CLI
 
 ```sh
 npx @superaligned/aclp install claude-code
 npx @superaligned/aclp server add memory --url http://127.0.0.1:8788/aclp
+npx @superaligned/aclp server events memory --on-error deny
 npx @superaligned/aclp status
+npx @superaligned/aclp help
 ```
-
-`install` shows the exact file changes and asks before writing. Hooks run a copy of the runtime in `~/.config/aclp/runtime`, never `npx`. `server add` reads the server's `/.well-known/aclp` document, signs you in with a token or OAuth when the server asks, and lets you choose which events it receives. Credentials stay in the OS keychain or a 0600 file, never in harness configuration.
-
-A server that is down, times out or answers badly never blocks the harness, except where its reply guards an action: a failed `tool.requested` or `permission.requested` request denies that call, and every other request proceeds without the server's context. `--on-error allow` or `--on-error deny` on `server add` or `server events` applies one policy to all of a server's requests; the failure still shows in `status`.
 
 | Support | Harnesses |
 | --- | --- |
 | Context before the model | Claude Code, Codex, OpenCode, Pi, OMP, Hermes Agent, Gemini CLI, Qwen Code, Factory Droid, Devin CLI, GitHub Copilot CLI, Kiro CLI, Amp, Cline CLI/SDK, OpenClaw |
 | Observe only | Cursor, Windsurf, Auggie CLI, Goose, Crush |
-| Model-initiated tool over MCP | Claude Desktop, ChatGPT Desktop, Zed |
+| MCP tool | Claude Desktop, ChatGPT Desktop, Zed |
 
-Run `npx @superaligned/aclp help` for every command and flag.
+Failed `tool.requested` and `permission.requested` requests deny; other failures allow. Credentials go to the OS keychain or a 0600 file.
 
-## Build a server or client
+## SDK
 
 ```sh
 pnpm add @superaligned/aclp
@@ -53,9 +51,17 @@ const reply = await client.request("input.submitted", {
   sessionId: "session-1",
   content: [{ type: "text", text: "Create a TypeScript class." }],
 }, context);
+
+client.notify("tool.finished", {
+  sessionId: "session-1",
+  call: { id: "call-1", name: "bash" },
+  outcome: { status: "succeeded" },
+});
+
+await client.flush();
 ```
 
-Notifications use `client.notify(method, params)` and `await client.flush()`. `onErrorFor(method, configured?)` gives the failure policy a harness applies to a request: `deny` for `tool.requested` and `permission.requested`, `allow` otherwise. The harness tooling (plan, install, registry, adapters) is exported from `@superaligned/aclp/hooks`.
+Harness tooling: `@superaligned/aclp/hooks`.
 
 ## Development
 
@@ -64,4 +70,4 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-Licensed under [MIT](LICENSE).
+MIT

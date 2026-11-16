@@ -1,16 +1,13 @@
 # aclp for Python
 
-Python client and callback server for the [Agent Context Lifecycle Protocol](https://github.com/superaligned-to/aclp). The client sends typed lifecycle events to local or remote servers over HTTP or HTTPS, with a sync `Client` and an `AsyncClient` that share one API. The server is an ASGI application that validates each event, runs your callback and checks its result against a JSON Schema.
-
-Requires Python 3.11 or later.
+[ACLP](https://github.com/superaligned-to/aclp) sync and async clients and an ASGI callback server. Python 3.11+.
 
 ```sh
-pip install superaligned-aclp
+uv add superaligned-aclp
+uv add uvicorn
 ```
 
 ## Example
-
-The example serves the app with [uvicorn](https://www.uvicorn.org/), which is not a dependency of this package: `pip install uvicorn`.
 
 ```python
 import asyncio
@@ -64,11 +61,18 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-It prints `{'context': ['Prefer plain functions over classes.']}`.
+```text
+{'context': ['Prefer plain functions over classes.']}
+```
 
-Notifications use `client.notify(method, params)` and `await client.flush()`; inside `async with`, the `AsyncClient` delivers them in the background, and the sync `Client` delivers each one before `notify` returns. A failed request raises a `ClientError`; `client.failure_policy(method)` says whether the harness should deny or allow the action the request guards. `aclp.discover(url)` reads a server's `/.well-known/aclp` document.
+```python
+with aclp.Client("http://127.0.0.1:8787/aclp") as client:
+    client.notify("session.started", {"sessionId": "session-1"})
+    client.flush()
 
-The server is loopback-only unless you name public hosts, which require `authorization`. Run it under an ASGI server with a bounded connection count.
+doc = aclp.discover("https://aclp.example.com")
+policy = aclp.on_error_for("tool.requested")
+```
 
 ## Development
 
@@ -76,4 +80,4 @@ The server is loopback-only unless you name public hosts, which require `authori
 uv run python scripts/check.py
 ```
 
-Licensed under [MIT](LICENSE).
+MIT
