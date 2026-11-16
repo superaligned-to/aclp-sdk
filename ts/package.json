@@ -18,7 +18,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/superaligned-to/aclp-ts.git"
+    "url": "https://github.com/superaligned-to/aclp-sdk.git",
+    "directory": "ts"
   },
   "engines": {
     "node": ">=22"

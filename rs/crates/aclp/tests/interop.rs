@@ -1,4 +1,4 @@
-//! Interoperability with the TypeScript SDK; run with `cargo xtask interop <aclp-ts checkout>`.
+//! Interoperability with the TypeScript SDK; run with `cargo xtask interop ../ts`.
 
 mod common;
 #[path = "interop/harness.rs"]

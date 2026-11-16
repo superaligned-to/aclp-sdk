@@ -59,8 +59,7 @@ fn main() -> ExitCode {
         ["check"] => gate::run(&root),
         ["interop", sdk] => interop::run(&root, sdk),
         _ => Err(
-            "usage: cargo xtask <generate [--check] | guard | check | interop <aclp-ts checkout>>"
-                .into(),
+            "usage: cargo xtask <generate [--check] | guard | check | interop <ts sdk dir>>".into(),
         ),
     };
 
