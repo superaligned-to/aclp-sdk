@@ -1,0 +1,33 @@
+name: interop
+
+on:
+  pull_request:
+    paths: ["ts/**", "rs/**", ".github/workflows/interop.yml"]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["ts/**", "rs/**", ".github/workflows/interop.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  ts-rs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ts/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: ts/.node-version
+          cache: pnpm
+          cache-dependency-path: ts/pnpm-lock.yaml
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rs
+      - run: pnpm install --frozen-lockfile && pnpm build
+        working-directory: ts
+      - run: cargo xtask interop ../ts
+        working-directory: rs

@@ -1,13 +1,19 @@
-name: check
+name: rs
 
 on:
   pull_request:
+    paths: ["rs/**", ".github/workflows/rs.yml"]
   workflow_dispatch:
   push:
     branches: [main]
+    paths: ["rs/**", ".github/workflows/rs.yml"]
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: rs
 
 jobs:
   check:
@@ -15,6 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rs
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-deny

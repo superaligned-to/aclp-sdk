@@ -1,13 +1,19 @@
-name: check
+name: ts
 
 on:
   pull_request:
+    paths: ["ts/**", ".github/workflows/ts.yml"]
   workflow_dispatch:
   push:
     branches: [main]
+    paths: ["ts/**", ".github/workflows/ts.yml"]
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: ts
 
 jobs:
   check:
@@ -15,9 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ts/package.json
       - uses: actions/setup-node@v5
         with:
-          node-version-file: .node-version
+          node-version-file: ts/.node-version
           cache: pnpm
+          cache-dependency-path: ts/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm check

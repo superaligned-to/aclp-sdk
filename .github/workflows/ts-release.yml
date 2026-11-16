@@ -1,12 +1,16 @@
-name: release
+name: ts-release
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["ts-v*"]
 
 permissions:
   contents: read
   id-token: write
+
+defaults:
+  run:
+    working-directory: ts
 
 jobs:
   publish:
@@ -15,14 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ts/package.json
       - uses: actions/setup-node@v5
         with:
-          node-version-file: .node-version
+          node-version-file: ts/.node-version
           cache: pnpm
+          cache-dependency-path: ts/pnpm-lock.yaml
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
+      - run: test "ts-v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
       - run: pnpm publish --access public --provenance --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
