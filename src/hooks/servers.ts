@@ -173,9 +173,12 @@ export async function setEvents(
 
   const chosen = events.filter((m) => supported.includes(m));
 
+  const offered =
+    (await lookup(current.endpoint))?.requests ?? current.requests;
+
   const next = updateServer(env, name, {
     events: chosen,
-    requests: current.requests.filter((m) => chosen.includes(m)),
+    requests: offered.filter((m) => chosen.includes(m)),
     ...(onError === undefined ? {} : { onError }),
   });
 
