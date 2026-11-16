@@ -179,6 +179,8 @@ export function toMessages(
 
   const hasAgent = h.agentId !== undefined || h.agentType !== undefined;
 
+  const byAgent = h.agentId === undefined ? {} : { agentId: h.agentId };
+
   const usage = (path: string | undefined, agentId?: string): Message[] =>
     path === undefined || opts.usage === undefined
       ? []
@@ -210,6 +212,7 @@ export function toMessages(
               method: "tool.requested",
               params: {
                 sessionId,
+                ...byAgent,
                 call: { ...call, arguments: h.input ?? {} },
               },
             },
@@ -229,6 +232,7 @@ export function toMessages(
           method: "tool.finished",
           params: {
             sessionId,
+            ...byAgent,
             call: {
               ...call,
               ...(h.input === undefined ? {} : { arguments: h.input }),
