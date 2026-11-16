@@ -35,31 +35,48 @@ function available(cmd: string): boolean {
   return run("/bin/sh", ["-c", `command -v ${cmd}`]) !== undefined;
 }
 
+export function securityLine(args: readonly string[]): string {
+  if (args.some((arg) => /[\r\n]/.test(arg))) {
+    throw new Error("A keychain argument cannot contain a line break");
+  }
+
+  const quoted = args.map(
+    (arg) => `"${arg.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`,
+  );
+
+  return `${quoted.join(" ")}\n`;
+}
+
 function keychain(): Store {
+  const get = (name: string): string | undefined =>
+    run("security", [
+      "find-generic-password",
+      "-s",
+      SERVICE,
+      "-a",
+      name,
+      "-w",
+    ])?.trimEnd();
+
   return {
     kind: "keychain",
-    get: (name) =>
-      run("security", [
-        "find-generic-password",
+    get,
+    set: (name, secret) => {
+      const line = securityLine([
+        "add-generic-password",
+        "-U",
         "-s",
         SERVICE,
         "-a",
         name,
         "-w",
-      ])?.trimEnd(),
-    set: (name, secret) => {
-      if (
-        run("security", [
-          "add-generic-password",
-          "-U",
-          "-s",
-          SERVICE,
-          "-a",
-          name,
-          "-w",
-          secret,
-        ]) === undefined
-      ) {
+        secret,
+      ]);
+
+      // security -i keeps the secret off argv, where ps would show it, but exits 0 even when the command fails.
+      run("security", ["-i"], line);
+
+      if (get(name) !== secret) {
         throw new Error("Could not write the credential to the macOS keychain");
       }
     },
